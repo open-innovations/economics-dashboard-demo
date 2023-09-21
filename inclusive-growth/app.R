@@ -409,22 +409,13 @@ server <- function(input, output, session) {
   lapply(seq_along(vNames), function(x) {
     output[[paste0("download_json_", x)]] <- downloadHandler(
       filename = function() {
-        "test.json"
+        paste0(vNames[x], ".json")
       },
       content = function(file) {
         jsonlite::write_json(mini_plots()[[x]], file)
       }
     )
   })
-
-  # output$download_json_1 <- downloadHandler(
-  #   filename = function() {
-  #     "test.json"
-  #   },
-  #   content = function(file) {
-  #     jsonlite::write_json(mini_plots()[[1]], file)
-  #   }
-  # )
 }
 
 shinyApp(ui = ui, server = server, enableBookmarking = "url")
