@@ -17,30 +17,21 @@ logos <- div(
       style = "float:right; margin-left: 10px"
     ),
     href = "https://open-innovations.org", target = "_blank"
-  ),
-  a(
-    img(
-      src = "lcc-logo.png",
-      height = 50,
-      style = "float:right"
-    ),
-    href = "https://leeds.gov.uk", target = "_blank"
-  ),
-  style = "height:50px; margin-top: 10px"
+  )
 )
 
 ui <- bslib::page_fluid(
   bslib::page_navbar(
-    title = "Leeds Inclusive Growth Dashboard",
+    title = "Economics Dashboard Demo",
     id = "navbar",
     collapsible = TRUE,
-    bg = "#1BACAF",
-    window_title = "Leeds Inclusive Growth Dashboard",
+    bg = "#722EA5",
+    window_title = "Economics Dashboard Demo",
     header = list(
       logos,
       p(
         paste(
-          "This is a site in active development and subject to change. Last updated on",
+          "This is a demo site in active development and subject to change. Last updated on",
           format(file.info("all_data.csv")$mtime, "%d %B %Y at %H:%M")
         ),
         style = "background-color: #000000; text-align: center;
@@ -74,22 +65,22 @@ ui <- bslib::page_fluid(
       uiOutput("data_table")
     ),
 
-    tabPanel(
-      title = "About",
-      value = "about",
-      titlePanel("About"),
-      h3("About this dashboard"),
-      p("This microsite was built by Open Innovations as part of a partnership with Leeds City Council where Open Innovations provides economic and data science expertise to the Council to help them exploit developments in economic data to better support the lives of people living and working in the city."),
-      p("This microsite, and the code that underpins it, is open source and freely available in a GitHub repository at https://github.com/open-innovations/lcc-economics/inclusive-growth/."),
-      h3("Data sources:"),
-      p("Data on employment, self employment, unemployment, economic activity, economic inactivity, and qualifications is sourced from the ONS Annual Population Survey/Labour Force Survey and accessed via NOMIS"),
-      p("Claimant count data is sourced from an experimental series which counts the number of people claiming Jobseeker's Allowance plus those who claim Universal Credit and are required to seek work and be available for work, and accessed via NOMIS"),
-      p("Population data is sourced from the ONS mid-year population estimates and accessed via NOMIS"),
-      p("GVA data is sourced from the ONS Regional Gross Value Added (Balanced) statistics"),
-      p("Productivity data (GVA per filled job) is sourced from the ONS Sub-regional Productivity Statistics"),
-      p("Children in Low Income Families data is sourced from DWP Stat-Xplore"),
-      p("All data is updated automatically when new data is released")
-    )
+    # tabPanel(
+    #   title = "About",
+    #   value = "about",
+    #   titlePanel("About"),
+    #   h3("About this dashboard"),
+    #   p("This microsite was built by Open Innovations as part of a partnership with Leeds City Council where Open Innovations provides economic and data science expertise to the Council to help them exploit developments in economic data to better support the lives of people living and working in the city."),
+    #   p("This microsite, and the code that underpins it, is open source and freely available in a GitHub repository at https://github.com/open-innovations/lcc-economics/inclusive-growth/."),
+    #   h3("Data sources:"),
+    #   p("Data on employment, self employment, unemployment, economic activity, economic inactivity, and qualifications is sourced from the ONS Annual Population Survey/Labour Force Survey and accessed via NOMIS"),
+    #   p("Claimant count data is sourced from an experimental series which counts the number of people claiming Jobseeker's Allowance plus those who claim Universal Credit and are required to seek work and be available for work, and accessed via NOMIS"),
+    #   p("Population data is sourced from the ONS mid-year population estimates and accessed via NOMIS"),
+    #   p("GVA data is sourced from the ONS Regional Gross Value Added (Balanced) statistics"),
+    #   p("Productivity data (GVA per filled job) is sourced from the ONS Sub-regional Productivity Statistics"),
+    #   p("Children in Low Income Families data is sourced from DWP Stat-Xplore"),
+    #   p("All data is updated automatically when new data is released")
+    # )
   )
 )
 
@@ -147,7 +138,7 @@ server <- function(input, output, session) {
     sparkline <- plot_ly(mini_plots()[[x]]) |>
       add_lines(
         x = ~date, y = ~value,
-        color = I("#ED7218"), span = I(1)
+        color = I("#000000"), span = I(1)
       ) |>
       layout(
         xaxis = list(visible = F, showgrid = F, title = ""),
@@ -182,7 +173,7 @@ server <- function(input, output, session) {
       temp_value <- tempdata$value[tempdata$date == max(tempdata$date)]
 
       value_box(
-        style = 'background-color: #1BACAF!important;',
+        style = 'background-color: #722EA5!important;',
         title = vNames[x],
         value = if (vNames[x] == "GVA") {
           paste0("£", temp_value/1000, "bn")
@@ -393,6 +384,10 @@ server <- function(input, output, session) {
                      label = "Download as CSV",
                      style = "margin-bottom: 20px"
       ),
+      downloadButton("download_json_all",
+                     label = "Download as JSON",
+                     style = "margin-bottom: 20px"
+      ),
       DT::renderDT(data_table_output())
     )
   })
@@ -403,6 +398,15 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       readr::write_csv(data_table_output(), file)
+    }
+  )
+
+  output$download_json_all <- downloadHandler(
+    filename = function() {
+      paste0("economic-dashboard-demo-", Sys.Date(), ".json")
+    },
+    content = function(file) {
+      jsonlite::write_json(data_table_output(), file)
     }
   )
 
