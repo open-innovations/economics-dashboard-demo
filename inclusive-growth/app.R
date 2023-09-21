@@ -201,7 +201,8 @@ server <- function(input, output, session) {
             "Latest data is for",
             unique(tempdata$date_name[tempdata$date == max(tempdata$date)])
           )
-        )
+        ),
+        downloadLink(paste0("download_json_", x), label = "JSON")
       )
     })
 
@@ -404,6 +405,26 @@ server <- function(input, output, session) {
       readr::write_csv(data_table_output(), file)
     }
   )
+
+  lapply(seq_along(vNames), function(x) {
+    output[[paste0("download_json_", x)]] <- downloadHandler(
+      filename = function() {
+        "test.json"
+      },
+      content = function(file) {
+        jsonlite::write_json(mini_plots()[[x]], file)
+      }
+    )
+  })
+
+  # output$download_json_1 <- downloadHandler(
+  #   filename = function() {
+  #     "test.json"
+  #   },
+  #   content = function(file) {
+  #     jsonlite::write_json(mini_plots()[[1]], file)
+  #   }
+  # )
 }
 
 shinyApp(ui = ui, server = server, enableBookmarking = "url")
